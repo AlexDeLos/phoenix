@@ -7,7 +7,7 @@ def read_arguments_from_file(fp):
     config = configparser.ConfigParser()
     config.read(fp)
 
-    settings = config['settings']
+    settings = config['settings'] 
 
     return _convert_arguments(settings)
 

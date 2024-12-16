@@ -21,7 +21,7 @@ except ImportError:
 from datahandler import DataHandler
 from odenet import ODENet
 from read_config import read_arguments_from_file
-from visualization_inte import *
+# from visualization_inte import *
 
 #torch.set_num_threads(16) #CHANGE THIS!
 
@@ -172,7 +172,7 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     target = target[not_nan_idx]
     '''
 
-    init_bias_y = data_handler.init_bias_y
+    init_bias_y =0 # data_handler.init_bias_y
     opt.zero_grad()
     predictions = torch.zeros(batch.shape).to(data_handler.device)
     for index, (time, batch_point) in enumerate(zip(t, batch)):
@@ -197,9 +197,9 @@ def save_model(odenet, folder, filename):
     odenet.save('{}{}.pt'.format(folder, filename))
 
 parser = argparse.ArgumentParser('Testing')
-parser.add_argument('--settings', type=str, default='config_yeast.cfg')
+parser.add_argument('--settings', type=str, default='./ode_net/code/config_yeast.cfg')
 clean_name =  "pramila_3551genes_1sample_24T" 
-parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/pramila_yeast_data/clean_data/{}.csv'.format(clean_name))
+parser.add_argument('--data', type=str, default='./pramila_yeast_data/clean_data/{}.csv'.format(clean_name))
 
 args = parser.parse_args()
 
@@ -251,12 +251,13 @@ if __name__ == "__main__":
                                         batch_time_frac=settings['batch_time_frac'],
                                         noise = settings['noise'],
                                         img_save_dir = img_save_dir,
-                                        scale_expression = settings['scale_expression'],
-                                        log_scale = settings['log_scale'],
-                                        init_bias_y = settings['init_bias_y'])
+                                        scale_expression = settings['scale_expression']#,
+                                        # log_scale = settings['log_scale'],
+                                        # init_bias_y = settings['init_bias_y']
+                                        )
     
     #Read in the prior matrix
-    prior_mat_loc = '/home/ubuntu/neural_ODE/pramila_yeast_data/clean_data/edge_prior_matrix_pramila_3551.csv'
+    prior_mat_loc = './pramila_yeast_data/clean_data/edge_prior_matrix_pramila_3551.csv'
     prior_mat = read_prior_matrix(prior_mat_loc, sparse = False, num_genes = data_handler.dim)
     #matrix_of_pm_1 = 2 * (torch.randint(low = 0, high=2, size =prior_mat.shape)-0.5)
     #prior_mat = prior_mat * matrix_of_pm_1
@@ -275,15 +276,16 @@ if __name__ == "__main__":
     loss_lambda = loss_lambda_at_start 
     
     # Initialization
-    odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'], 
-                    log_scale = settings['log_scale'], init_bias_y = settings['init_bias_y'])
+    odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer']#, 
+                    # log_scale = settings['log_scale'], init_bias_y = settings['init_bias_y']
+                    )
     odenet.float()
     param_count = sum(p.numel() for p in odenet.parameters() if p.requires_grad)
     param_ratio = round(param_count/ (data_handler.dim)**2, 3)
     print("Using a NN with {} neurons per layer, with {} trainable parameters, i.e. parametrization ratio = {}".format(settings['neurons_per_layer'], param_count, param_ratio))
     
     if settings['pretrained_model']:
-        pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/best_val_model.pt'
+        pretrained_model_file = './ode_net/code/output/_pretrained_best_model/best_val_model.pt'
         odenet.load(pretrained_model_file)
         #print("Loaded in pre-trained model!")
         
@@ -327,8 +329,9 @@ if __name__ == "__main__":
 
     
     # Init plot
-    if settings['viz']:
-        visualizer = Visualizator1D(data_handler, odenet, settings, my_range_tuple = (0, 150))
+    # TODO: Fix this
+    # if settings['viz']:
+    #     visualizer = Visualizator1D(data_handler, odenet, settings, my_range_tuple = (0, 150))
 
     # Training loop
     #batch_times = [] 
@@ -349,11 +352,11 @@ if __name__ == "__main__":
     else:
         iterations_in_epoch = ceil(data_handler.train_data_length / settings['batch_size'])
 
-    if settings['viz']:
-        with torch.no_grad():
-            visualizer.visualize()
-            visualizer.plot()
-            visualizer.save(img_save_dir, 0)
+    # if settings['viz']:
+    #     with torch.no_grad():
+    #         visualizer.visualize()
+    #         visualizer.plot()
+    #         visualizer.save(img_save_dir, 0)
     start_time = perf_counter()
     #quit()
     
@@ -476,11 +479,11 @@ if __name__ == "__main__":
             
         if (settings['viz'] and epoch in viz_epochs) or (settings['viz'] and epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate):
             print("Saving plot")
-            with torch.no_grad():
+            # with torch.no_grad():
                 #print("nope..")
-                visualizer.visualize()
-                visualizer.plot()
-                visualizer.save(img_save_dir, epoch)
+                # visualizer.visualize()
+                # visualizer.plot()
+                # visualizer.save(img_save_dir, epoch)
         
         #print("Saving intermediate model")
         #save_model(odenet, intermediate_models_dir, 'model_at_epoch{}'.format(epoch))
