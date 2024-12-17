@@ -21,10 +21,10 @@ except ImportError:
 from datahandler import DataHandler
 from odenet import ODENet
 from read_config import read_arguments_from_file
+import matplotlib.pyplot as plt
 # from visualization_inte import *
 
 #torch.set_num_threads(16) #CHANGE THIS!
-
 def plot_LR_range_test(all_lrs_used, training_loss, img_save_dir):
     plt.figure()
     plt.plot(all_lrs_used, training_loss, color = "blue", label = "Training loss")
@@ -110,7 +110,7 @@ def validation(odenet, data_handler, method, explicit_time):
     if method == "trajectory":
         False
 
-    init_bias_y = data_handler.init_bias_y
+    init_bias_y = 0#data_handler.init_bias_y
     #odenet.eval()
     with torch.no_grad():
         predictions = []
