@@ -21,7 +21,8 @@ except ImportError:
 from datahandler import DataHandler
 from odenet import ODENet
 from read_config import read_arguments_from_file
-from visualization_inte import *
+import matplotlib.pyplot as plt
+# from visualization_inte import *
 
 #torch.set_num_threads(16) #CHANGE THIS!
 
@@ -193,11 +194,11 @@ def save_model(odenet, folder, filename):
     odenet.save('{}{}.pt'.format(folder, filename))
 
 parser = argparse.ArgumentParser('Testing')
-parser.add_argument('--settings', type=str, default='config_BCell.cfg')
+parser.add_argument('--settings', type=str, default='./ode_net/code/config_BCell.cfg')
 clean_name =  "mias_control_14691genes_2samples_6T" 
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/mias_bcell_data/clean_data/{}.csv'.format(clean_name))
 test_data_name = "mias_control_14691genes_2samples_6T" 
-parser.add_argument('--test_data', type=str, default='/home/ubuntu/neural_ODE/mias_bcell_data/clean_data/{}.csv'.format(test_data_name))
+parser.add_argument('--test_data', type=str, default='./pramila_yeast_data/clean_data/{}.csv'.format(test_data_name))
 
 args = parser.parse_args()
 
@@ -250,8 +251,9 @@ if __name__ == "__main__":
                                         noise = settings['noise'],
                                         img_save_dir = img_save_dir,
                                         scale_expression = settings['scale_expression'],
-                                        log_scale = settings['log_scale'],
-                                        init_bias_y = settings['init_bias_y'], fp_test = None) #,fp_test = args.test_data)
+                                        # log_scale = settings['log_scale'],
+                                        # init_bias_y = settings['init_bias_y'], fp_test = None
+                                        ) #,fp_test = args.test_data)
     
     abs_prior = True
     

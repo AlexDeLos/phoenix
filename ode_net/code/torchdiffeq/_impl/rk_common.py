@@ -1,6 +1,7 @@
 import bisect
 import collections
 import torch
+import numpy as np
 from .interp import _interp_evaluate, _interp_fit
 from .misc import (_compute_error_ratio,
                    _select_initial_step,
@@ -145,6 +146,7 @@ class RKAdaptiveStepsizeODESolver(AdaptiveStepsizeODESolver):
         else:
             first_step = self.first_step
         self.rk_state = _RungeKuttaState(self.y0, f0, t[0], t[0], first_step, [self.y0] * 5)
+        
         self.next_grid_index = min(bisect.bisect(self.grid_points.tolist(), t[0]), len(self.grid_points) - 1)
 
     def _advance(self, next_t):
@@ -156,7 +158,7 @@ class RKAdaptiveStepsizeODESolver(AdaptiveStepsizeODESolver):
             n_steps += 1
         return _interp_evaluate(self.rk_state.interp_coeff, self.rk_state.t0, self.rk_state.t1, next_t)
 
-    def _adaptive_step(self, rk_state):
+    def _adaptive_step(self, rk_state: tuple):
         """Take an adaptive Runge-Kutta step to integrate the ODE."""
         y0, f0, _, t0, dt, interp_coeff = rk_state
         # dtypes: self.y0.dtype (probably float32); self.dtype (probably float64)
@@ -172,9 +174,10 @@ class RKAdaptiveStepsizeODESolver(AdaptiveStepsizeODESolver):
         ########################################################
         #                      Assertions                      #
         ########################################################
-        # assert t0 + dt > t0, 'underflow in dt {}'.format(dt.item())
-        if not (t0 + dt > t0):
-            print("underflow warning")
+        #TODO: try to log the values
+        assert t0 + dt > t0, 'underflow in dt {}'.format(dt.item())
+        # if not (t0 + dt > t0):
+        #     print("underflow warning")
         assert torch.isfinite(y0).all(), 'non-finite values in state `y`: {}'.format(y0)
 
         ########################################################
@@ -206,7 +209,7 @@ class RKAdaptiveStepsizeODESolver(AdaptiveStepsizeODESolver):
         ########################################################
         #                   Update RK State                    #
         ########################################################
-        t_next = t0 + dt + 2 * eps if accept_step else t0
+        t_next = t0 + dt + 2 * eps if accept_step else t0 #underflow effect here
         y_next = y1 if accept_step else y0
         if on_grid and accept_step:
             # We've just passed a discontinuity in f; we should update f to match the side of the discontinuity we're
@@ -217,7 +220,7 @@ class RKAdaptiveStepsizeODESolver(AdaptiveStepsizeODESolver):
                 self.next_grid_index += 1
         f_next = f1 if accept_step else f0
         interp_coeff = self._interp_fit(y0, y1, k, dt) if accept_step else interp_coeff
-        dt_next = _optimal_step_size(dt, error_ratio, self.safety, self.ifactor, self.dfactor, self.order)
+        dt_next = _optimal_step_size(dt, error_ratio, self.safety, self.ifactor, self.dfactor, self.order) # underflow also effects here
         rk_state = _RungeKuttaState(y_next, f_next, t0, t_next, dt_next, interp_coeff)
         return rk_state
 
