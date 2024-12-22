@@ -108,7 +108,7 @@ def validation(odenet, data_handler, method, explicit_time):
     if method == "trajectory":
         False
 
-    init_bias_y = data_handler.init_bias_y
+    init_bias_y = 0 #data_handler.init_bias_y
     #odenet.eval()
     with torch.no_grad():
         predictions = []
@@ -170,7 +170,7 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     target = target[not_nan_idx]
     '''
 
-    init_bias_y = data_handler.init_bias_y
+    init_bias_y = 0 # data_handler.init_bias_y
     opt.zero_grad()
     predictions = torch.zeros(batch.shape).to(data_handler.device)
     for index, (time, batch_point) in enumerate(zip(t, batch)):
