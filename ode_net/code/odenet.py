@@ -59,6 +59,8 @@ class ODENet(nn.Module):
         
         
         self.gene_multipliers = nn.Parameter(torch.rand(1,ndim), requires_grad= True)
+
+        self.device =device
                 
         # Initialize the layers of the model
         for n in self.net_sums.modules():
@@ -87,7 +89,7 @@ class ODENet(nn.Module):
         prods = torch.exp(self.net_prods(y))
         sums_prods_concat = torch.cat((sums, prods), dim= - 1)
         joint = self.net_alpha_combine(sums_prods_concat)
-        final = torch.relu(self.gene_multipliers)*(joint-y)
+        final = torch.relu(self.gene_multipliers.to(self.device))*(joint-y)
         return(final) 
 
     def prior_only_forward(self, t, y):

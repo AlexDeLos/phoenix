@@ -262,6 +262,8 @@ if __name__ == "__main__":
     #Read in the prior matrix
     prior_mat_loc = './breast_cancer_data/clean_data/edge_prior_matrix_desmedt_500.csv'
     prior_mat = read_prior_matrix(prior_mat_loc, sparse = False, num_genes = data_handler.dim)
+    prior_mat = prior_mat.to(device)
+
     
     if abs_prior:
         prior_mat = torch.abs(prior_mat)
@@ -500,10 +502,10 @@ if __name__ == "__main__":
         if (settings['viz'] and epoch in viz_epochs) or (settings['viz'] and epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate):
             print("Saving plot")
             with torch.no_grad():
-                #print("nope..")
-                visualizer.visualize()
-                visualizer.plot()
-                visualizer.save(img_save_dir, epoch)
+                print("nope..")
+                # visualizer.visualize()
+                # visualizer.plot()
+                # visualizer.save(img_save_dir, epoch)
         
         #print("Saving intermediate model")
         #save_model(odenet, intermediate_models_dir, 'model_at_epoch{}'.format(epoch))
